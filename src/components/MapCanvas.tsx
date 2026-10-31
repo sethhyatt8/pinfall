@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import type { RefObject } from 'react'
 import { Circle, CircleMarker, MapContainer, Marker, Polyline, TileLayer, useMap } from 'react-leaflet'
 import L from 'leaflet'
-import type { LeafletEvent, Map as LeafletMap } from 'leaflet'
+import type { LeafletEvent, Map as LeafletMap, TileEvent } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { LatLng } from '../lib/geo.ts'
 import { ESRI_ATTRIBUTION, ESRI_TILES } from '../lib/tiles.ts'
@@ -85,6 +85,7 @@ export function MapCanvas({
       <BindMap mapRef={mapRef} />
       <Frame fitKey={fitKey} fitPoints={fitPoints} fallback={fallback} />
       <InvalidateSize />
+      <ReleaseHungTiles />
       {user && Number.isFinite(user.accuracyM) ? (
         <Circle
           center={[user.lat, user.lng]}
@@ -186,6 +187,55 @@ function Frame({ fitKey, fitPoints, fallback }: { fitKey: string; fitPoints: Lat
     const bounds = L.latLngBounds(points.map((point) => [point.lat, point.lng] as [number, number]))
     map.fitBounds(bounds.pad(0.45), { animate: false, maxZoom: 18 })
   }, [fitKey, map])
+  return null
+}
+
+const TILE_LIMIT_MS = 8000
+
+function ReleaseHungTiles() {
+  const map = useMap()
+  useEffect(() => {
+    const timers = new Map<HTMLImageElement, number>()
+    const drop = (tile: HTMLImageElement) => {
+      const timer = timers.get(tile)
+      if (timer != null) window.clearTimeout(timer)
+      timers.delete(tile)
+    }
+    const arm = (tile: HTMLImageElement) => {
+      if (timers.has(tile) || tile.complete) return
+      const timer = window.setTimeout(() => {
+        timers.delete(tile)
+        if (!tile.complete) {
+          // Abort the image request so a stuck satellite tile cannot hold the document load open.
+          tile.src =
+            'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+        }
+      }, TILE_LIMIT_MS)
+      timers.set(tile, timer)
+    }
+    const onStart = (event: TileEvent) => {
+      const tile = event.tile
+      if (!(tile instanceof HTMLImageElement)) return
+      drop(tile)
+      arm(tile)
+    }
+    const onDone = (event: TileEvent) => {
+      if (event.tile instanceof HTMLImageElement) drop(event.tile)
+    }
+    // The tile layer requests images in an effect that runs before this one.
+    map.getContainer().querySelectorAll('img.leaflet-tile').forEach((node) => {
+      if (node instanceof HTMLImageElement) arm(node)
+    })
+    map.on('tileloadstart', onStart)
+    map.on('tileload', onDone)
+    map.on('tileerror', onDone)
+    return () => {
+      map.off('tileloadstart', onStart)
+      map.off('tileload', onDone)
+      map.off('tileerror', onDone)
+      for (const timer of timers.values()) window.clearTimeout(timer)
+    }
+  }, [map])
   return null
 }
 

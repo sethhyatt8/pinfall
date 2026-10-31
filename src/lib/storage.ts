@@ -15,9 +15,21 @@ async function database() {
   })
 }
 
-export async function loadState(): Promise<Persisted> {
-  const fromIdb = await readIdb()
+/** IndexedDB on iOS WebKit can stay pending forever. Don't wait longer than this. */
+const IDB_LIMIT_MS = 1500
+
+export function peekState(): Persisted {
+  return readLocal() ?? emptyPersisted()
+}
+
+export async function loadState(timeoutMs = IDB_LIMIT_MS): Promise<Persisted> {
   const fromLocal = readLocal()
+  const fromIdb = await Promise.race([
+    readIdb(),
+    new Promise<null>((resolve) => {
+      setTimeout(() => resolve(null), timeoutMs)
+    }),
+  ])
   if (fromIdb && fromLocal) return freshness(fromLocal) > freshness(fromIdb) ? fromLocal : fromIdb
   return fromIdb ?? fromLocal ?? emptyPersisted()
 }

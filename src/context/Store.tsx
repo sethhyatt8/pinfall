@@ -1,20 +1,24 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Splash } from '../components/Chrome.tsx'
 import { ROUGH_GUESS_ACCURACY_M } from '../lib/sample.ts'
 import { selectionKey, statKey } from '../lib/holes.ts'
 import { createId, emptyPersisted } from '../lib/persist.ts'
-import { loadState, saveState } from '../lib/storage.ts'
+import { loadState, peekState, saveState } from '../lib/storage.ts'
 import type { BasketId, Persisted, PositionPoint, StatOverride, TargetKind, TeeId, UnitSystem } from '../types.ts'
 import { StoreContext, type StoreApi } from './store-context.ts'
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<Persisted | null>(null)
+  // Paint from the synchronous copy. IndexedDB must not gate the first screen.
+  const [data, setData] = useState<Persisted>(() => peekState())
+  const [hydrated, setHydrated] = useState(false)
+  const edited = useRef(false)
 
   useEffect(() => {
     let cancel = false
     void loadState().then((loaded) => {
-      if (!cancel) setData(loaded)
+      if (cancel) return
+      if (!edited.current) setData(loaded)
+      setHydrated(true)
     })
     return () => {
       cancel = true
@@ -22,12 +26,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (!data) return
+    if (!hydrated) return
     void saveState(data)
-  }, [data])
+  }, [data, hydrated])
 
   const update = useCallback((recipe: (prev: Persisted) => Persisted) => {
-    setData((prev) => (prev ? recipe(prev) : prev))
+    edited.current = true
+    setData((prev) => recipe(prev))
   }, [])
 
   const setUnits = useCallback(
@@ -217,14 +222,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   )
 
   const replaceAll = useCallback((next: Persisted) => {
+    edited.current = true
     setData(next)
   }, [])
 
   const eraseAll = useCallback(() => {
+    edited.current = true
     setData(emptyPersisted())
   }, [])
-
-  if (!data) return <Splash />
 
   const api: StoreApi = {
     data,

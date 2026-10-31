@@ -19,9 +19,11 @@ export function Splash() {
 export function Mark() {
   return (
     <svg className="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-      <circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
-      <circle cx="16" cy="16" r="2.2" fill="currentColor" />
-      <path d="M16 2.5v4.5M16 25v4.5M2.5 16h4.5M25 16h4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M10 6.2h12.2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M11.2 7.4v7.4M16 7.2v8M20.8 7.4v7.4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M7.6 15.6h16.8l-2.2 6.6a2.4 2.4 0 0 1-2.3 1.6h-7.8a2.4 2.4 0 0 1-2.3-1.6l-2.2-6.6z" fill="#ff6b3d" />
+      <path d="M7.4 15.2h17.2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M16 23.6v4.2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
     </svg>
   )
 }

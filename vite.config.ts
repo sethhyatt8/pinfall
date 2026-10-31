@@ -10,13 +10,19 @@ const base = '/pinfall/'
 
 export default defineConfig({
   base,
+  build: {
+    // iPhone Chrome is WebKit. Keep the bundle inside what iOS 15.6 can parse.
+    target: ['es2022', 'safari15.6', 'ios15.6'],
+  },
   plugins: [
     react(),
     tailwindcss(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
-      injectRegister: 'auto',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'pwa-192.png', 'pwa-512.png'],
+      injectRegister: false,
       manifest: {
         name: 'Pinfall',
         short_name: 'Pinfall',
@@ -28,17 +34,16 @@ export default defineConfig({
         scope: base,
         lang: 'en',
         icons: [
-          { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'pwa-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'pwa-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'pwa-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       scope: base,
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2,ico}'],
-        navigateFallback: `${base}index.html`,
-        // Precache keys must be the same absolute paths the navigation route requests.
-        modifyURLPrefix: { '': base },
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2,webmanifest}'],
+        globIgnores: ['**/sw.js', '**/workbox-*.js', '**/*.map'],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
     }),
   ],

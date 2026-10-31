@@ -14,3 +14,15 @@ createRoot(root).render(
     <App />
   </StrictMode>,
 )
+
+// Register after the first paint. window.load waits on map tiles and fonts, and a
+// cache-first worker must not be allowed to hold the document open.
+if ('serviceWorker' in navigator) {
+  const register = () => {
+    const base = import.meta.env.BASE_URL
+    void navigator.serviceWorker.register(`${base}sw.js`, { scope: base }).catch(() => {
+      // Private mode can refuse workers. The page still runs from the network.
+    })
+  }
+  window.setTimeout(register, 0)
+}
