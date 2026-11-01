@@ -25,6 +25,12 @@ html,
 body,
 #root {
   min-height: 100%;
+  max-width: 100%;
+}
+
+html,
+body {
+  overflow-x: clip;
 }
 
 body {
@@ -70,8 +76,10 @@ a {
 
 .page {
   min-height: 100dvh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
+  max-width: 100%;
   background:
     radial-gradient(1200px 400px at 10% -10%, rgba(214, 242, 92, 0.08), transparent 50%),
     var(--color-ink);
@@ -79,14 +87,15 @@ a {
 
 .hole-page {
   /* svh is the viewport with browser toolbars open, so Chrome on iOS
-     cannot cover the dock. dvh is the fallback where svh is unsupported. */
+     cannot cover the dock. dvh is the fallback where svh is unsupported.
+     The dock is a non-shrinking flex child, so it stays inside that box.
+     The distance and map shrink; the layout scrolls if a toolbar still covers it. */
   min-height: 0;
   height: 100dvh;
   height: 100svh;
   max-height: 100dvh;
   max-height: 100svh;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .wrap {
@@ -172,13 +181,16 @@ a {
   justify-content: center;
   gap: 8px;
   min-height: 48px;
-  padding: 0 14px;
+  padding: 10px 14px;
   border-radius: 14px;
   border: 1px solid transparent;
   font-weight: 600;
   letter-spacing: -0.01em;
   text-decoration: none;
   cursor: pointer;
+  text-align: center;
+  line-height: 1.15;
+  white-space: normal;
 }
 
 .btn:disabled,
@@ -197,6 +209,18 @@ a.is-disabled {
   background: #e7f6ee;
   color: #102018;
   border-color: #e7f6ee;
+}
+
+.btn-tee {
+  background: #79d4ff;
+  color: #06202c;
+  border-color: #79d4ff;
+}
+
+.btn-basket {
+  background: #ff6b3d;
+  color: #2a0d06;
+  border-color: #ff6b3d;
 }
 
 .btn-ghost {
@@ -262,6 +286,21 @@ a.is-disabled {
   color: var(--color-lime-ink);
 }
 
+.segmented-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.segmented-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f4f7f2;
+}
+
 .segmented {
   display: flex;
   padding: 4px;
@@ -273,17 +312,31 @@ a.is-disabled {
 
 .segmented button {
   flex: 1;
-  min-height: 40px;
+  min-height: 48px;
+  min-width: 0;
   border: 0;
   border-radius: 10px;
   background: transparent;
-  color: var(--color-muted);
-  font-weight: 600;
+  color: #f4f7f2;
+  font-weight: 700;
+  padding: 8px 6px;
+  white-space: normal;
+  line-height: 1.15;
 }
 
 .segmented button[aria-checked='true'] {
   background: var(--color-lime);
   color: var(--color-lime-ink);
+}
+
+.segmented.tone-tee button[aria-checked='true'] {
+  background: #79d4ff;
+  color: #06202c;
+}
+
+.segmented.tone-basket button[aria-checked='true'] {
+  background: #ff6b3d;
+  color: #2a0d06;
 }
 
 .field {
@@ -316,6 +369,7 @@ a.is-disabled {
 
 .link-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -374,14 +428,23 @@ a.is-disabled {
 }
 
 .hole-layout {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .hole-copy {
-  padding: 10px 16px 0;
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 42%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 16px 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -389,9 +452,60 @@ a.is-disabled {
 
 .hole-nav {
   display: grid;
-  grid-template-columns: 76px 1fr 76px;
+  grid-template-columns: minmax(76px, 1fr) minmax(0, 1.4fr) minmax(76px, 1fr);
   gap: 8px;
-  align-items: center;
+  align-items: stretch;
+}
+
+.hole-step {
+  min-height: 48px;
+  width: 100%;
+  padding-inline: 8px;
+  font-size: 1.05rem;
+}
+
+.hole-jump {
+  display: flex;
+  min-width: 0;
+}
+
+.hole-jump select {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid var(--color-line);
+  background: var(--color-panel-2);
+  color: #f4f7f2;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 0 8px;
+  text-align: center;
+}
+
+.saved-count {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.saved-count span {
+  min-width: 0;
+}
+
+.saved-count .tee-n {
+  color: #79d4ff;
+}
+
+.saved-count .basket-n {
+  color: #ff6b3d;
+  text-align: right;
+}
+
+.location-help p + p {
+  margin-top: 6px;
 }
 
 .hole-title {
@@ -416,6 +530,10 @@ a.is-disabled {
   line-height: 0.85;
   letter-spacing: -0.05em;
   color: var(--color-lime);
+}
+
+.hole-page .hero-distance {
+  font-size: clamp(2.2rem, 11vw, 3.6rem);
 }
 
 .hero-empty {
@@ -448,7 +566,8 @@ a.is-disabled {
   font-size: 0.78rem;
   background: var(--color-panel);
   border: 1px solid var(--color-line);
-  white-space: nowrap;
+  white-space: normal;
+  max-width: min(210px, 48vw);
 }
 
 .pill i {
@@ -482,10 +601,36 @@ a.is-disabled {
 }
 
 .hole-page .map-stage {
-  flex: 1 1 auto;
+  flex: 1 1 72px;
   height: auto;
-  margin: 8px 12px;
-  min-height: 0;
+  margin: 6px 12px 0;
+  min-height: 48px;
+}
+
+.map-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 12px 0;
+  justify-content: flex-end;
+}
+
+.map-actions button {
+  background: rgba(16, 22, 20, 0.92);
+  color: #f4f7f2;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  min-height: 36px;
+  padding: 0 10px;
+}
+
+.map-actions button:disabled {
+  opacity: 0.45;
+}
+
+.hole-page .leaflet-control-attribution {
+  max-width: 62%;
+  font-size: 9px !important;
 }
 
 .map-canvas {
@@ -497,21 +642,25 @@ a.is-disabled {
 .map-tools {
   position: absolute;
   z-index: 500;
-  top: 10px;
-  right: 10px;
+  top: 8px;
+  left: 8px;
+  right: 8px;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: flex-end;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+  max-width: calc(100% - 16px);
 }
 
 .map-tools button {
-  background: rgba(16, 22, 20, 0.9);
+  background: rgba(16, 22, 20, 0.92);
   color: #f4f7f2;
   border: 1px solid var(--color-line);
   border-radius: 999px;
-  min-height: 40px;
-  padding: 0 12px;
+  min-height: 36px;
+  padding: 0 10px;
+  max-width: 100%;
 }
 
 .map-tools button:disabled {
@@ -565,14 +714,25 @@ a.is-disabled {
   position: sticky;
   bottom: 0;
   z-index: 30;
-  flex-shrink: 0;
+  flex: 0 0 auto;
   margin-top: auto;
-  padding: 8px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  padding: 6px 12px calc(8px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  background: rgba(16, 22, 20, 0.96);
+  gap: 4px;
+  background: rgba(16, 22, 20, 0.98);
   border-top: 1px solid var(--color-line);
+}
+
+.dock .segmented button,
+.dock .btn {
+  min-height: 44px;
+}
+
+.dock .link-row .btn {
+  min-height: 40px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 .score-row {
@@ -654,8 +814,9 @@ dialog {
   color: inherit;
   border-radius: 20px;
   padding: 16px;
-  width: min(440px, calc(100vw - 24px));
-  max-height: min(85dvh, 720px);
+  width: min(440px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  max-height: calc(100svh - 16px);
   overflow: auto;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
 }
@@ -683,6 +844,7 @@ dialog.sheet {
 
 .dialog-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -789,6 +951,7 @@ dialog.sheet {
   .hole-copy {
     grid-column: 1;
     grid-row: 1;
+    max-height: none;
     overflow: auto;
     padding-bottom: 12px;
   }
@@ -797,6 +960,7 @@ dialog.sheet {
     grid-column: 2;
     grid-row: 1 / span 2;
     margin: 12px 12px 12px 0;
+    min-height: 240px;
   }
 
   .dock {

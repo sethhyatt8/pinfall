@@ -2,7 +2,7 @@ import { useEffect, useId, useRef } from 'react'
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'tee' | 'basket'
   full?: boolean
 }
 
@@ -25,25 +25,33 @@ export function Segmented<T extends string>({
   value,
   options,
   onChange,
+  tone = 'default',
 }: {
   label: string
   value: T
   options: { value: T; label: string }[]
   onChange: (value: T) => void
+  tone?: 'default' | 'tee' | 'basket'
 }) {
+  const id = useId()
   return (
-    <div className="segmented" role="radiogroup" aria-label={label}>
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          role="radio"
-          aria-checked={option.value === value}
-          onClick={() => onChange(option.value)}
-        >
-          {option.label}
-        </button>
-      ))}
+    <div className="segmented-wrap">
+      <span className="segmented-label" id={id}>
+        {label}
+      </span>
+      <div className={`segmented tone-${tone}`} role="radiogroup" aria-labelledby={id}>
+        {options.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={option.value === value}
+            onClick={() => onChange(option.value)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

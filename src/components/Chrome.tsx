@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useStore } from '../context/store-context.ts'
 import { formatAccuracy } from '../lib/geo.ts'
+import { IPHONE_CHROME_LOCATION_PATH, type LocationIssue } from '../lib/location.ts'
 
 export function Splash() {
   return (
@@ -144,6 +145,24 @@ export function InstallHint() {
         </button>
       </div>
     </section>
+  )
+}
+
+export function LocationHelp({ issue }: { issue: LocationIssue | null }) {
+  if (!issue) return null
+  if (issue === 'unsupported') {
+    return (
+      <p className="note warn location-help" data-testid="location-help">
+        This browser does not share GPS. Open Pinfall in Chrome, then allow location.
+      </p>
+    )
+  }
+  return (
+    <div className="note warn location-help" data-testid="location-help">
+      <p>{issue === 'denied' ? 'Location is blocked for Chrome.' : 'Location is unavailable.'}</p>
+      <p>On iPhone: {IPHONE_CHROME_LOCATION_PATH}.</p>
+      <p>Then return to Pinfall and reload.</p>
+    </div>
   )
 }
 

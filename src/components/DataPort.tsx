@@ -87,7 +87,7 @@ export function DataPort() {
         <section className="stack">
           <h2>How a pin is learned</h2>
           <p>
-            “I’m at the tee” and “I’m at the basket” watch GPS for {SAMPLE_MIN_MS / 1000}–{SAMPLE_MAX_MS / 1000}{' '}
+            “I’m at Tee” and “I’m at Basket” watch GPS for {SAMPLE_MIN_MS / 1000}–{SAMPLE_MAX_MS / 1000}{' '}
             seconds. Fixes worse than {MAX_ACCEPT_ACCURACY_M} m are dropped. A visit is saved only when at least{' '}
             {MIN_GOOD_FIXES} fixes agree, as one averaged point.
           </p>

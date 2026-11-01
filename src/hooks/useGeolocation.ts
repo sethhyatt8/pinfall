@@ -1,9 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
+import type { LocationIssue } from '../lib/location.ts'
 import type { GpsFix } from '../types.ts'
 
-export function useGeolocation(enabled: boolean): { fix: GpsFix | null; error: string | null } {
+export function useGeolocation(enabled: boolean): {
+  fix: GpsFix | null
+  error: string | null
+  issue: LocationIssue | null
+} {
   const [fix, setFix] = useState<GpsFix | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [issue, setIssue] = useState<LocationIssue | null>(null)
   const gotFix = useRef(false)
   const unsupported = enabled && !('geolocation' in navigator)
 
@@ -15,6 +21,7 @@ export function useGeolocation(enabled: boolean): { fix: GpsFix | null; error: s
         if (!active) return
         gotFix.current = true
         setError(null)
+        setIssue(null)
         const accuracy = position.coords.accuracy
         setFix({
           lat: position.coords.latitude,
@@ -26,10 +33,14 @@ export function useGeolocation(enabled: boolean): { fix: GpsFix | null; error: s
       (err) => {
         if (!active) return
         if (err.code === err.PERMISSION_DENIED) {
-          setError('Location is blocked. Allow location for this site, turn Precise Location on, then reload.')
+          setIssue('denied')
+          setError('Location blocked')
           return
         }
-        if (!gotFix.current) setError('Searching for GPS…')
+        if (!gotFix.current && (err.code === err.POSITION_UNAVAILABLE || err.code === err.TIMEOUT)) {
+          setIssue('unavailable')
+          setError('Location unavailable')
+        }
       },
       { enableHighAccuracy: true, maximumAge: 1000, timeout: 20000 },
     )
@@ -39,7 +50,8 @@ export function useGeolocation(enabled: boolean): { fix: GpsFix | null; error: s
     }
   }, [enabled, unsupported])
 
-  return { fix, error: unsupported ? 'This browser does not share GPS.' : error }
+  if (unsupported) return { fix: null, error: 'No GPS', issue: 'unsupported' }
+  return { fix, error, issue }
 }
 
 export function useNow(active: boolean): number {

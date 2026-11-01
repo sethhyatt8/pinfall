@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import type { Map as LeafletMap } from 'leaflet'
-import { GpsPill, Missing, OfflineBanner, TopBar } from './Chrome.tsx'
+import { GpsPill, LocationHelp, Missing, OfflineBanner, TopBar } from './Chrome.tsx'
 import { MapCanvas, type MapLine, type MapPin } from './MapCanvas.tsx'
 import { Button, Dialog, Segmented, TextField } from './ui.tsx'
 import { useStore } from '../context/store-context.ts'
@@ -35,7 +35,8 @@ export function HoleView() {
   const hole = course ? getHole(course, Number(holeParam)) : undefined
   const { data, rememberHole, addGpsPoint, deletePoint, clearTarget, upsertGuess, setStatOverride, clearStatOverride } =
     useStore()
-  const { fix, error } = useGeolocation(true)
+  const { fix, error, issue } = useGeolocation(true)
+  const navigate = useNavigate()
   const now = useNow(true)
   const targetRef = useRef<{ target: TargetKind; variant: string } | null>(null)
   const mapRef = useRef<LeafletMap | null>(null)
@@ -148,6 +149,10 @@ export function HoleView() {
   )
   const fitKey = `${course.id}:${hole.number}:${tee.id}:${basketId}:${frameMode}:${nonce}`
   const busy = sampler.phase.kind === 'running'
+  const teeShort = tee.id === 'main' ? 'Tee' : `Tee ${tee.label}`
+  const basketShort = hole.baskets.length > 1 ? `Basket ${basketId}` : 'Basket'
+  const teeAction = `I’m at ${teeShort}`
+  const basketAction = `I’m at ${basketShort}`
   const teeName = tee.id === 'main' ? 'the tee' : `tee ${tee.label}`
   const basketName = hole.baskets.length > 1 ? `basket ${basketId}` : 'the basket'
   const holeIndex = course.holes.findIndex((item) => item.number === hole.number)
@@ -163,7 +168,8 @@ export function HoleView() {
     heroMeters = teeDistance
     heroCaption = `to ${teeName} — basket not recorded`
   } else if (!fix) {
-    heroCaption = error ?? 'Waiting for GPS'
+    heroCaption =
+      issue === 'denied' || issue === 'unavailable' ? 'GPS is off. Follow the steps above.' : 'Waiting for GPS'
   } else {
     heroCaption = 'GPS is live. Record the basket, or drop a rough pin.'
   }
@@ -227,53 +233,14 @@ export function HoleView() {
       <OfflineBanner />
       <div className="hole-layout">
         <div className="hole-copy stack">
-          <div className="hole-nav">
-            <Link
-              className={`btn btn-ghost ${prev ? '' : 'is-disabled'}`}
-              to={prev ? `/c/${course.id}/h/${prev.number}` : '#'}
-              aria-disabled={!prev}
-              onClick={(event) => {
-                if (!prev) event.preventDefault()
-              }}
-            >
-              Prev
-            </Link>
-            <div className="hole-title">
-              <h2>{hole.label === String(hole.number) ? `Hole ${hole.number}` : hole.label}</h2>
-              <p className="muted">
-                {hole.number} of {course.holes.length}
-                {par == null ? '' : ` · Par ${par}`}
-              </p>
-            </div>
-            <Link
-              className={`btn btn-ghost ${next ? '' : 'is-disabled'}`}
-              to={next ? `/c/${course.id}/h/${next.number}` : '#'}
-              aria-disabled={!next}
-              onClick={(event) => {
-                if (!next) event.preventDefault()
-              }}
-            >
-              Next
-            </Link>
+          <div className="hole-title">
+            <h2>{hole.label === String(hole.number) ? `Hole ${hole.number}` : hole.label}</h2>
+            <p className="muted">
+              {hole.number} of {course.holes.length}
+              {par == null ? '' : ` · Par ${par}`}
+            </p>
           </div>
-
-          {hole.baskets.length > 1 ? (
-            <Segmented
-              label="Basket"
-              value={basketId}
-              options={hole.baskets.map((basket) => ({ value: basket, label: `Basket ${basket}` }))}
-              onChange={(value) => rememberHole(course.id, hole.number, tee.id, value)}
-            />
-          ) : null}
-          {hole.tees.length > 1 ? (
-            <Segmented
-              label="Tee"
-              value={tee.id}
-              options={hole.tees.map((item) => ({ value: item.id, label: item.label }))}
-              onChange={(value) => rememberHole(course.id, hole.number, value, basketId)}
-            />
-          ) : null}
-
+          {issue ? <LocationHelp issue={issue} /> : null}
           <div className="hero-row">
             <p className={`hero-distance ${heroMeters == null ? 'hero-empty' : ''}`} data-testid="live-distance">
               {heroMeters == null ? '—' : formatDistance(heroMeters, units)}
@@ -330,28 +297,6 @@ export function HoleView() {
             mapRef={mapRef}
             onDragEnd={onDragEnd}
           />
-          <div className="map-tools">
-            <button
-              type="button"
-              disabled={!fix}
-              onClick={() => {
-                setFrameMode('me')
-                setNonce((value) => value + 1)
-              }}
-            >
-              Where I am
-            </button>
-            {!basketEstimate ? (
-              <button type="button" onClick={() => drop('basket')}>
-                Basket at center
-              </button>
-            ) : null}
-            {!teeEstimate ? (
-              <button type="button" onClick={() => drop('tee')}>
-                Tee at center
-              </button>
-            ) : null}
-          </div>
           <div className="map-legend">
             <span>
               <i className="swatch you" /> You
@@ -364,13 +309,105 @@ export function HoleView() {
             </span>
           </div>
         </div>
+        <div className="map-actions">
+          <button
+            type="button"
+            disabled={!fix}
+            onClick={() => {
+              setFrameMode('me')
+              setNonce((value) => value + 1)
+            }}
+          >
+            Where I am
+          </button>
+          {!basketEstimate ? (
+            <button type="button" onClick={() => drop('basket')}>
+              Basket at center
+            </button>
+          ) : null}
+          {!teeEstimate ? (
+            <button type="button" onClick={() => drop('tee')}>
+              Tee at center
+            </button>
+          ) : null}
+        </div>
 
         <div className="dock">
-          <Button variant="secondary" full disabled={busy} onClick={() => begin('tee')}>
-            I’m at {teeName}
+          <div className="hole-nav">
+            <Link
+              className={`btn btn-ghost hole-step ${prev ? '' : 'is-disabled'}`}
+              to={prev ? `/c/${course.id}/h/${prev.number}` : '#'}
+              aria-label="Previous hole"
+              aria-disabled={!prev}
+              onClick={(event) => {
+                if (!prev) event.preventDefault()
+              }}
+            >
+              Prev
+            </Link>
+            <label className="hole-jump">
+              <span className="sr-only">Jump to hole</span>
+              <select
+                aria-label="Jump to hole"
+                data-testid="hole-jump"
+                value={hole.number}
+                onChange={(event) => {
+                  navigate(`/c/${course.id}/h/${event.target.value}`)
+                }}
+              >
+                {course.holes.map((item) => (
+                  <option key={item.number} value={item.number}>
+                    {item.label === String(item.number) ? `Hole ${item.number}` : item.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Link
+              className={`btn btn-ghost hole-step ${next ? '' : 'is-disabled'}`}
+              to={next ? `/c/${course.id}/h/${next.number}` : '#'}
+              aria-label="Next hole"
+              aria-disabled={!next}
+              onClick={(event) => {
+                if (!next) event.preventDefault()
+              }}
+            >
+              Next
+            </Link>
+          </div>
+          {hole.baskets.length > 1 ? (
+            <Segmented
+              label="Which basket"
+              tone="basket"
+              value={basketId}
+              options={hole.baskets.map((basket) => ({ value: basket, label: `Basket ${basket}` }))}
+              onChange={(value) => rememberHole(course.id, hole.number, tee.id, value)}
+            />
+          ) : null}
+          {hole.tees.length > 1 ? (
+            <Segmented
+              label="Which tee"
+              tone="tee"
+              value={tee.id}
+              options={hole.tees.map((item) => ({
+                value: item.id,
+                label: item.id === 'main' ? 'Tee' : `Tee ${item.label}`,
+              }))}
+              onChange={(value) => rememberHole(course.id, hole.number, value, basketId)}
+            />
+          ) : null}
+          <p className="saved-count" data-testid="saved-count">
+            <span className="tee-n" data-testid="tee-saved">
+              {teeShort}: {teePoints.length} saved
+            </span>
+            <span className="basket-n" data-testid="basket-saved">
+              {basketShort}: {basketPoints.length} saved
+            </span>
+          </p>
+          <Button variant="tee" full disabled={busy} data-testid="mark-tee" onClick={() => begin('tee')}>
+            {teeAction}
           </Button>
-          <Button variant="primary" full disabled={busy} onClick={() => begin('basket')}>
-            I’m at {basketName}
+          <Button variant="basket" full disabled={busy} data-testid="mark-basket" onClick={() => begin('basket')}>
+            {basketAction}
           </Button>
           <div className="link-row">
             <Link className="btn btn-ghost" to={`/c/${course.id}/throw`}>

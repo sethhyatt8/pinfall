@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { locationHelpText } from '../lib/location.ts'
 import { finalizeSample, isAcceptedFix, shouldEndSample, type SampleSuccess } from '../lib/sample.ts'
 import type { GpsFix } from '../types.ts'
 
@@ -49,7 +50,11 @@ export function useSampler(onSaved: (result: SampleSuccess) => void): {
     cleanup()
     finishedRef.current = false
     if (!('geolocation' in navigator)) {
-      setPhase({ kind: 'failed', label, reason: 'This browser does not share GPS with the page.' })
+      setPhase({
+        kind: 'failed',
+        label,
+        reason: 'This browser does not share GPS. Open Pinfall in Chrome, then allow location.',
+      })
       return
     }
     const fixes: GpsFix[] = []
@@ -99,13 +104,16 @@ export function useSampler(onSaved: (result: SampleSuccess) => void): {
         if (shouldEndSample(Date.now() - startedAt, fixes)) finish()
       },
       (error) => {
-        if (error.code !== error.PERMISSION_DENIED || finishedRef.current) return
+        if (finishedRef.current) return
+        const denied = error.code === error.PERMISSION_DENIED
+        const unavailable = error.code === error.POSITION_UNAVAILABLE || error.code === error.TIMEOUT
+        if (!denied && !(unavailable && fixes.length === 0)) return
         finishedRef.current = true
         cleanup()
         setPhase({
           kind: 'failed',
           label,
-          reason: 'Location is blocked. Allow location for this site, turn Precise Location on, and try again.',
+          reason: locationHelpText(denied ? 'denied' : 'unavailable'),
         })
       },
       { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 },

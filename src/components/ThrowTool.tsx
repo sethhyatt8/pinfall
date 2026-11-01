@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router'
 import type { Map as LeafletMap } from 'leaflet'
-import { GpsPill, Missing, OfflineBanner, TopBar } from './Chrome.tsx'
+import { GpsPill, LocationHelp, Missing, OfflineBanner, TopBar } from './Chrome.tsx'
 import { MapCanvas, type MapPin } from './MapCanvas.tsx'
 import { Button } from './ui.tsx'
 import { useStore } from '../context/store-context.ts'
@@ -21,7 +21,7 @@ export function ThrowTool() {
   const { courseId = '' } = useParams()
   const course = getCourse(courseId)
   const { data } = useStore()
-  const { fix, error } = useGeolocation(true)
+  const { fix, error, issue } = useGeolocation(true)
   const now = useNow(true)
   const mapRef = useRef<LeafletMap | null>(null)
   const [start, setStart] = useState<Mark | null>(null)
@@ -160,7 +160,7 @@ export function ThrowTool() {
             </span>
           </div>
         </div>
-        {!fix ? <p className="note">{error ?? 'Waiting for GPS before a mark can be saved.'}</p> : null}
+        {issue ? <LocationHelp issue={issue} /> : !fix ? <p className="note">Waiting for GPS before a mark can be saved.</p> : null}
       </main>
     </div>
   )
