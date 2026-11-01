@@ -78,9 +78,15 @@ a {
 }
 
 .hole-page {
+  /* svh is the viewport with browser toolbars open, so Chrome on iOS
+     cannot cover the dock. dvh is the fallback where svh is unsupported. */
+  min-height: 0;
   height: 100dvh;
+  height: 100svh;
   max-height: 100dvh;
-  overflow: hidden;
+  max-height: 100svh;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .wrap {
@@ -188,9 +194,9 @@ a.is-disabled {
 }
 
 .btn-secondary {
-  background: var(--color-panel-2);
-  color: #f4f7f2;
-  border-color: var(--color-line);
+  background: #e7f6ee;
+  color: #102018;
+  border-color: #e7f6ee;
 }
 
 .btn-ghost {
@@ -476,10 +482,10 @@ a.is-disabled {
 }
 
 .hole-page .map-stage {
-  flex: 1;
+  flex: 1 1 auto;
   height: auto;
   margin: 8px 12px;
-  min-height: 180px;
+  min-height: 0;
 }
 
 .map-canvas {
@@ -556,7 +562,12 @@ a.is-disabled {
 }
 
 .dock {
-  padding: 8px 16px calc(12px + env(safe-area-inset-bottom));
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+  flex-shrink: 0;
+  margin-top: auto;
+  padding: 8px 16px calc(12px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: 8px;
