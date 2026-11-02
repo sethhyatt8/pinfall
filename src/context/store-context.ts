@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react'
 import type {
   BasketId,
+  GpsFix,
   Persisted,
   PositionPoint,
   StatOverride,
@@ -14,7 +15,7 @@ export interface StoreApi {
   setUnits: (units: UnitSystem) => void
   dismissInstallHint: () => void
   rememberHole: (courseId: string, hole: number, tee: TeeId, basket: BasketId) => void
-  addGpsPoint: (point: Omit<PositionPoint, 'id' | 'createdAt' | 'source'>) => void
+  addGpsPoint: (point: Omit<PositionPoint, 'id' | 'createdAt' | 'source'>, fixes?: GpsFix[]) => void
   deletePoint: (id: string) => void
   clearTarget: (courseId: string, hole: number, target: TargetKind, variant: string) => void
   upsertGuess: (

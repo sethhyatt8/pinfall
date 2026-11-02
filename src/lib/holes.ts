@@ -51,13 +51,41 @@ export function readOverride(
   return overrides[courseId]?.[statKey(hole, tee, basket)]
 }
 
+function shortestTee(hole: HoleSeed): TeeSeed {
+  let best = hole.tees[0]
+  let bestLength = listedTeeFeet(best)
+  for (const tee of hole.tees) {
+    const length = listedTeeFeet(tee)
+    if (length < bestLength) {
+      best = tee
+      bestLength = length
+    }
+  }
+  return best
+}
+
+function listedTeeFeet(tee: TeeSeed): number {
+  const lengths = Object.values(tee.lengthFt).filter((value): value is number => typeof value === 'number')
+  if (lengths.length === 0) return Number.POSITIVE_INFINITY
+  return Math.min(...lengths)
+}
+
+/** Main tee when the course has one, otherwise the shorter pad. */
+export function defaultTee(hole: HoleSeed): TeeSeed {
+  return hole.tees.find((tee) => tee.id === 'main') ?? shortestTee(hole)
+}
+
+export function defaultBasket(hole: HoleSeed): BasketId {
+  return hole.baskets.includes('A') ? 'A' : hole.baskets[0]
+}
+
 export function resolveTee(hole: HoleSeed, preferred: TeeId | undefined): TeeSeed {
-  return hole.tees.find((tee) => tee.id === preferred) ?? hole.tees[0]
+  return hole.tees.find((tee) => tee.id === preferred) ?? defaultTee(hole)
 }
 
 export function resolveBasket(hole: HoleSeed, preferred: BasketId | undefined): BasketId {
   if (preferred && hole.baskets.includes(preferred)) return preferred
-  return hole.baskets[0]
+  return defaultBasket(hole)
 }
 
 export function listedPar(tee: TeeSeed, basket: BasketId, override: StatOverride | undefined): number | null {

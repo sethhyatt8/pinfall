@@ -63,6 +63,20 @@ export interface PositionPoint {
   createdAt: number
 }
 
+/** One GPS sample from a hold-still visit. `visitId` is the averaged point. */
+export interface RawFix {
+  id: string
+  visitId: string
+  courseId: string
+  hole: number
+  target: TargetKind
+  variant: string
+  lat: number
+  lng: number
+  accuracyM: number
+  timestamp: number
+}
+
 export interface Round {
   id: string
   courseId: string
@@ -86,6 +100,8 @@ export interface Persisted {
   version: 1
   settings: Settings
   points: PositionPoint[]
+  /** Every fix from a visit. Older saves have none; the averaged point is still in `points`. */
+  fixes: RawFix[]
   rounds: Round[]
   overrides: OverrideMap
 }

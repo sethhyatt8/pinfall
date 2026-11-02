@@ -4,7 +4,7 @@ import { ROUGH_GUESS_ACCURACY_M } from '../lib/sample.ts'
 import { selectionKey, statKey } from '../lib/holes.ts'
 import { createId, emptyPersisted } from '../lib/persist.ts'
 import { loadState, peekState, saveState } from '../lib/storage.ts'
-import type { BasketId, Persisted, PositionPoint, StatOverride, TargetKind, TeeId, UnitSystem } from '../types.ts'
+import type { BasketId, GpsFix, Persisted, PositionPoint, StatOverride, TargetKind, TeeId, UnitSystem } from '../types.ts'
 import { StoreContext, type StoreApi } from './store-context.ts'
 
 export function StoreProvider({ children }: { children: ReactNode }) {
@@ -80,18 +80,41 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   )
 
   const addGpsPoint = useCallback(
-    (point: Omit<PositionPoint, 'id' | 'createdAt' | 'source'>) => {
-      update((prev) => ({
-        ...prev,
-        points: [...prev.points, { ...point, id: createId(), createdAt: Date.now(), source: 'gps' }],
-      }))
+    (point: Omit<PositionPoint, 'id' | 'createdAt' | 'source'>, fixes: GpsFix[] = []) => {
+      update((prev) => {
+        const id = createId()
+        const createdAt = Date.now()
+        return {
+          ...prev,
+          points: [...prev.points, { ...point, id, createdAt, source: 'gps' }],
+          fixes: [
+            ...prev.fixes,
+            ...fixes.map((fix) => ({
+              id: createId(),
+              visitId: id,
+              courseId: point.courseId,
+              hole: point.hole,
+              target: point.target,
+              variant: point.variant,
+              lat: fix.lat,
+              lng: fix.lng,
+              accuracyM: Number.isFinite(fix.accuracyM) && fix.accuracyM > 0 ? fix.accuracyM : 50,
+              timestamp: fix.timestamp ?? createdAt,
+            })),
+          ],
+        }
+      })
     },
     [update],
   )
 
   const deletePoint = useCallback(
     (id: string) => {
-      update((prev) => ({ ...prev, points: prev.points.filter((point) => point.id !== id) }))
+      update((prev) => ({
+        ...prev,
+        points: prev.points.filter((point) => point.id !== id),
+        fixes: prev.fixes.filter((fix) => fix.visitId !== id),
+      }))
     },
     [update],
   )
@@ -107,6 +130,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               point.hole === hole &&
               point.target === target &&
               point.variant === variant
+            ),
+        ),
+        fixes: prev.fixes.filter(
+          (fix) =>
+            !(
+              fix.courseId === courseId &&
+              fix.hole === hole &&
+              fix.target === target &&
+              fix.variant === variant
             ),
         ),
       }))

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { locationHelpText } from '../lib/location.ts'
 import { finalizeSample, isAcceptedFix, shouldEndSample, type SampleSuccess } from '../lib/sample.ts'
 import type { GpsFix } from '../types.ts'
@@ -17,7 +17,7 @@ export type SamplePhase =
   | { kind: 'saved'; label: string; result: SampleSuccess }
   | { kind: 'failed'; label: string; reason: string }
 
-export function useSampler(onSaved: (result: SampleSuccess) => void): {
+export function useSampler(onSaved: (result: SampleSuccess, fixes: GpsFix[]) => void): {
   phase: SamplePhase
   start: (label: string) => void
   cancel: () => void
@@ -38,13 +38,13 @@ export function useSampler(onSaved: (result: SampleSuccess) => void): {
 
   useEffect(() => cleanup, [])
 
-  const cancel = () => {
+  const cancel = useCallback(() => {
     finishedRef.current = true
     cleanup()
     setPhase({ kind: 'idle' })
-  }
+  }, [])
 
-  const dismiss = () => setPhase({ kind: 'idle' })
+  const dismiss = useCallback(() => setPhase({ kind: 'idle' }), [])
 
   const start = (label: string) => {
     cleanup()
@@ -84,7 +84,7 @@ export function useSampler(onSaved: (result: SampleSuccess) => void): {
       cleanup()
       const result = finalizeSample(fixes)
       if (result.ok) {
-        onSavedRef.current(result)
+        onSavedRef.current(result, fixes.slice())
         setPhase({ kind: 'saved', label, result })
       } else {
         setPhase({ kind: 'failed', label, reason: result.reason })

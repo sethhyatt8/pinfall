@@ -2,7 +2,7 @@ import { cleanupOutdatedCaches, matchPrecache, precache } from 'workbox-precachi
 import { setCacheNameDetails } from 'workbox-core'
 
 // Bump the precache name so a worker left over from the first deploy is replaced.
-setCacheNameDetails({ prefix: 'pinfall', precache: 'precache-v5' })
+setCacheNameDetails({ prefix: 'pinfall', precache: 'precache-v6' })
 
 precache(self.__WB_MANIFEST)
 cleanupOutdatedCaches()

@@ -51,7 +51,7 @@ export function HoleView() {
   const [pointTab, setPointTab] = useState<TargetKind>('basket')
   const [clearing, setClearing] = useState<TargetKind | null>(null)
 
-  const sampler = useSampler((result: SampleSuccess) => {
+  const sampler = useSampler((result: SampleSuccess, fixes) => {
     const target = targetRef.current
     if (!course || !hole || !target) return
     addGpsPoint({
@@ -62,7 +62,7 @@ export function HoleView() {
       lat: result.lat,
       lng: result.lng,
       accuracyM: result.accuracyM,
-    })
+    }, fixes)
   })
 
   const tee = hole ? resolveTee(hole, data.settings.lastTee[selectionKey(course?.id ?? '', hole.number)]) : undefined

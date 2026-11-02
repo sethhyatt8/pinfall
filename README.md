@@ -1,6 +1,6 @@
 # Pinfall
 
-Mobile disc golf distances from the phone’s GPS. Tee and basket pins start empty and are learned on the device. There is no account and no server.
+Collect tee and basket GPS on the phone. Open a course, stand on the spot, and tap **TEE** or **BASKET**. There is no account and no server.
 
 Seeded courses:
 
@@ -8,7 +8,7 @@ Seeded courses:
 - **Tamanend Park** (Southampton, PA) — 9 holes, all par 3, about 1,785 ft total. Per-hole lengths are blank. The map opens near the approximate first tee (40.18016, -75.03501). That point is not saved as the tee.
 - **Tyler State Park** (Newtown, PA) — East 1–18 and West 19–36. Pars and lengths are blank so you can copy the signs. The map opens at the upper plantation parking lot. That point is not a tee or a basket.
 
-No tee or basket coordinate is shipped with the app.
+The phone does not download pin coordinates. Readings stay on the device until you send them. `public/data/<course>-pins.json` is the file the merge script updates; the app does not read it.
 
 ## Run locally
 
@@ -50,7 +50,8 @@ The deployed URL must be **HTTPS**. Geolocation does not work on a phone over pl
 2. On the phone, open that URL once while you have a connection. That installs the app shell.
 3. **iPhone:** Safari → Share → **Add to Home Screen**. Open Pinfall from the icon, not from a normal tab. In Settings → Privacy & Security → Location Services, allow Safari (or the home-screen app) while using the app, and turn **Precise Location** on.
 4. **Android:** Chrome → menu → **Install app** or **Add to Home screen**. Allow location when asked.
-5. Stand in the open, open a hole, and tap **I’m at the basket** or **I’m at the tee**. Hold still for about 10–15 seconds. Fixes worse than 20 m are discarded. The visit is saved only when at least 3 fixes agree.
+5. Pick a course. The hole screen shows **HOLE 1** (or whichever hole you were on), **TEE**, and **BASKET**. Tap the spot you are standing on. Hold still while it counts down. A green **SAVED ✓** confirms it, then disappears. **✓ Saved (1)** stays under that button. **◀ Hole** and **Hole ▶** move between holes.
+6. On the course list, tap **Send readings**. On iPhone this opens the share sheet with a JSON file. If the browser cannot share files, the same JSON downloads. The file includes every saved visit and every raw fix already on the phone (course, hole, tee or basket id, lat, lng, accuracy, timestamp).
 6. After that first load, the app, pins, distances, and scorecard open offline. GPS still works offline. Satellite photos are loaded live from Esri and are not stored for offline use — Esri’s World Imagery layer is not licensed for offline export. If you are offline, pins still plot on an empty map.
 
 A phone cannot use your computer’s `localhost`. Location on the dev server only works in a browser on that same computer.
@@ -70,6 +71,21 @@ Satellite imagery is [Esri World Imagery](https://server.arcgisonline.com/ArcGIS
 `Tiles © Esri — Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community`
 
 The attribution stays on the map. Leaflet’s own credit stays too.
+
+## Send readings back
+
+1. On the phone, map the holes, then tap **Send readings** and save the JSON (Files, AirDrop, or mail).
+2. On a computer, from this repo:
+
+```bash
+npm run merge-readings -- path/to/pinfall-readings.json
+```
+
+That reads the export, dedupes by reading id against `public/data/<course>-pins.json`, and writes the combined raw readings plus a pin for each tee and basket. The pin is the inverse-variance average. A sample farther than 8 m and farther than 3× its own accuracy is left out. A visit that already has raw fixes is not averaged a second time. Run the same file again and the ids already in the bundle are skipped.
+
+3. Commit the updated `public/data/*-pins.json` and push to `main` so the next deploy has the coordinates on file.
+
+The live app still only shows what was saved on that phone. It does not load the bundled JSON.
 
 ## Data
 

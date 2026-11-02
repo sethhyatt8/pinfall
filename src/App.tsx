@@ -5,6 +5,7 @@ import { CourseHome } from './components/CourseHome.tsx'
 import { CourseList } from './components/CourseList.tsx'
 import { DataPort } from './components/DataPort.tsx'
 import { HoleView } from './components/HoleView.tsx'
+import { MappingView } from './components/MappingView.tsx'
 import { Scorecard } from './components/Scorecard.tsx'
 import { ThrowTool } from './components/ThrowTool.tsx'
 import { StoreProvider } from './context/Store.tsx'
@@ -17,7 +18,8 @@ export default function App() {
           <Routes>
             <Route path="/" element={<CourseList />} />
             <Route path="/c/:courseId" element={<CourseHome />} />
-            <Route path="/c/:courseId/h/:hole" element={<HoleView />} />
+            <Route path="/c/:courseId/h/:hole" element={<MappingView />} />
+            <Route path="/c/:courseId/h/:hole/details" element={<HoleView />} />
             <Route path="/c/:courseId/card" element={<Scorecard />} />
             <Route path="/c/:courseId/throw" element={<ThrowTool />} />
             <Route path="/data" element={<DataPort />} />

@@ -57,6 +57,7 @@ function readLocal(): Persisted | null {
 function freshness(data: Persisted): number {
   let newest = 0
   for (const point of data.points) newest = Math.max(newest, point.createdAt)
+  for (const fix of data.fixes) newest = Math.max(newest, fix.timestamp)
   for (const round of data.rounds) newest = Math.max(newest, round.finishedAt ?? round.startedAt)
   return newest
 }

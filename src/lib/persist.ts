@@ -3,6 +3,7 @@ import type {
   OverrideMap,
   Persisted,
   PositionPoint,
+  RawFix,
   Round,
   Settings,
   StatOverride,
@@ -28,6 +29,7 @@ export function emptyPersisted(): Persisted {
     version: 1,
     settings: emptySettings(),
     points: [],
+    fixes: [],
     rounds: [],
     overrides: {},
   }
@@ -46,6 +48,7 @@ export function serializeExport(data: Persisted, exportedAt = new Date().toISOSt
       exportedAt,
       settings: data.settings,
       points: data.points,
+      fixes: data.fixes,
       rounds: data.rounds,
       overrides: data.overrides,
     },
@@ -73,10 +76,11 @@ export function sanitizePersisted(raw: unknown): Persisted | null {
   if (!isRecord(raw)) return null
   const settings = sanitizeSettings(raw.settings)
   const points = sanitizePoints(raw.points)
+  const fixes = sanitizeFixes(raw.fixes)
   const rounds = sanitizeRounds(raw.rounds)
   const overrides = sanitizeOverrides(raw.overrides)
-  if (!settings || !points || !rounds || !overrides) return null
-  return { version: 1, settings, points, rounds, overrides }
+  if (!settings || !points || !fixes || !rounds || !overrides) return null
+  return { version: 1, settings, points, fixes, rounds, overrides }
 }
 
 function sanitizeSettings(raw: unknown): Settings | null {
@@ -128,6 +132,39 @@ function sanitizePoints(raw: unknown): PositionPoint[] | null {
     })
   }
   return points
+}
+
+function sanitizeFixes(raw: unknown): RawFix[] | null {
+  if (raw == null) return []
+  if (!Array.isArray(raw) || raw.length > 20000) return null
+  const fixes: RawFix[] = []
+  for (const item of raw) {
+    if (!isRecord(item)) continue
+    const lat = item.lat
+    const lng = item.lng
+    const accuracyM = item.accuracyM
+    const hole = item.hole
+    if (typeof item.id !== 'string' || typeof item.visitId !== 'string' || typeof item.courseId !== 'string') continue
+    if (item.target !== 'tee' && item.target !== 'basket') continue
+    if (typeof item.variant !== 'string' || item.variant.length === 0 || item.variant.length > 20) continue
+    if (typeof lat !== 'number' || typeof lng !== 'number' || lat < -90 || lat > 90 || lng < -180 || lng > 180) continue
+    if (typeof accuracyM !== 'number' || !Number.isFinite(accuracyM) || accuracyM <= 0 || accuracyM > 10000) continue
+    if (typeof hole !== 'number' || !Number.isInteger(hole) || hole < 1 || hole > 99) continue
+    if (typeof item.timestamp !== 'number' || !Number.isFinite(item.timestamp)) continue
+    fixes.push({
+      id: item.id,
+      visitId: item.visitId,
+      courseId: item.courseId,
+      hole,
+      target: item.target,
+      variant: item.variant,
+      lat,
+      lng,
+      accuracyM,
+      timestamp: item.timestamp,
+    })
+  }
+  return fixes
 }
 
 function sanitizeRounds(raw: unknown): Round[] | null {
