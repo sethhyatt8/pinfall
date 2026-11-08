@@ -82,8 +82,8 @@ export function MappingView() {
   return (
     <div className="page map-mode">
       <div className="map-top">
-        <Link to="/" className="map-back">
-          Courses
+        <Link to={`/c/${course.id}`} className="map-back">
+          Course
         </Link>
       </div>
       <div className="map-heading">

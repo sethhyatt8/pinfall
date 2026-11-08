@@ -69,6 +69,35 @@ describe('backup import', () => {
   })
 })
 
+describe('round fields', () => {
+  it('keeps strokes, a drive, and photo names without storing the photo bytes', () => {
+    const json = JSON.stringify({
+      app: 'pinfall',
+      version: 1,
+      rounds: [
+        {
+          id: 'r1',
+          courseId: 'tamanend',
+          startedAt: 10,
+          hole: 3,
+          strokes: { '1': 3, '2': 4 },
+          drives: { '1': { lat: 40.18, lng: -75.03, accuracyM: 4, timestamp: 11 } },
+          attachments: [{ id: 'a1', hole: 1, name: 'disc.jpg', mime: 'image/jpeg', size: 1200, createdAt: 12 }],
+        },
+      ],
+    })
+    const parsed = parseImport(json)
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+    const round = parsed.data.rounds[0]
+    expect(round?.hole).toBe(3)
+    expect(round?.drives?.['1']?.lat).toBe(40.18)
+    expect(round?.attachments?.[0]?.name).toBe('disc.jpg')
+    expect(JSON.stringify(parsed.data)).not.toContain('base64')
+    expect(serializeExport(parsed.data)).not.toContain('data:')
+  })
+})
+
 describe('listed stats and score', () => {
   it('lets an edit replace the seeded par without inventing a length', () => {
     expect(effectiveStat(3, undefined, 'par')).toBe(3)

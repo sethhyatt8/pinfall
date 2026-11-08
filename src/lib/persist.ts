@@ -1,5 +1,7 @@
 import type {
+  AttachmentMeta,
   BasketId,
+  DriveMark,
   OverrideMap,
   Persisted,
   PositionPoint,
@@ -189,9 +191,54 @@ function sanitizeRounds(raw: unknown): Round[] | null {
       strokes,
     }
     if (typeof item.finishedAt === 'number') round.finishedAt = item.finishedAt
+    if (typeof item.hole === 'number' && Number.isInteger(item.hole) && item.hole >= 1 && item.hole <= 99) {
+      round.hole = item.hole
+    }
+    const drives = sanitizeDrives(item.drives)
+    if (drives && Object.keys(drives).length > 0) round.drives = drives
+    const attachments = sanitizeAttachments(item.attachments)
+    if (attachments && attachments.length > 0) round.attachments = attachments
     rounds.push(round)
   }
   return rounds
+}
+
+function sanitizeDrives(raw: unknown): Record<string, DriveMark> | null {
+  if (raw == null) return {}
+  if (!isRecord(raw)) return null
+  const drives: Record<string, DriveMark> = {}
+  for (const [hole, value] of Object.entries(raw)) {
+    if (!/^\d+$/.test(hole) || !isRecord(value)) continue
+    const { lat, lng, accuracyM, timestamp } = value
+    if (typeof lat !== 'number' || lat < -90 || lat > 90) continue
+    if (typeof lng !== 'number' || lng < -180 || lng > 180) continue
+    if (typeof accuracyM !== 'number' || !Number.isFinite(accuracyM) || accuracyM < 0) continue
+    if (typeof timestamp !== 'number' || !Number.isFinite(timestamp)) continue
+    drives[hole] = { lat, lng, accuracyM, timestamp }
+  }
+  return drives
+}
+
+function sanitizeAttachments(raw: unknown): AttachmentMeta[] | null {
+  if (raw == null) return []
+  if (!Array.isArray(raw) || raw.length > 200) return null
+  const attachments: AttachmentMeta[] = []
+  for (const item of raw) {
+    if (!isRecord(item)) continue
+    if (typeof item.id !== 'string' || typeof item.name !== 'string' || typeof item.mime !== 'string') continue
+    if (typeof item.hole !== 'number' || !Number.isInteger(item.hole) || item.hole < 1 || item.hole > 99) continue
+    if (typeof item.size !== 'number' || !Number.isFinite(item.size) || item.size < 0) continue
+    if (typeof item.createdAt !== 'number' || !Number.isFinite(item.createdAt)) continue
+    attachments.push({
+      id: item.id,
+      hole: item.hole,
+      name: item.name.slice(0, 180),
+      mime: item.mime.slice(0, 120),
+      size: item.size,
+      createdAt: item.createdAt,
+    })
+  }
+  return attachments
 }
 
 function sanitizeOverrides(raw: unknown): OverrideMap | null {

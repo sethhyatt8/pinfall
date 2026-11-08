@@ -3,9 +3,12 @@ import type { ErrorInfo, ReactNode } from 'react'
 import { HashRouter, Route, Routes } from 'react-router'
 import { CourseHome } from './components/CourseHome.tsx'
 import { CourseList } from './components/CourseList.tsx'
+import { CourseMode } from './components/CourseMode.tsx'
 import { DataPort } from './components/DataPort.tsx'
 import { HoleView } from './components/HoleView.tsx'
 import { MappingView } from './components/MappingView.tsx'
+import { RoundSummary } from './components/RoundSummary.tsx'
+import { RoundView } from './components/RoundView.tsx'
 import { Scorecard } from './components/Scorecard.tsx'
 import { ThrowTool } from './components/ThrowTool.tsx'
 import { StoreProvider } from './context/Store.tsx'
@@ -17,8 +20,11 @@ export default function App() {
         <HashRouter>
           <Routes>
             <Route path="/" element={<CourseList />} />
-            <Route path="/c/:courseId" element={<CourseHome />} />
+            <Route path="/c/:courseId" element={<CourseMode />} />
+            <Route path="/c/:courseId/info" element={<CourseHome />} />
             <Route path="/c/:courseId/h/:hole" element={<MappingView />} />
+            <Route path="/c/:courseId/round/:hole" element={<RoundView />} />
+            <Route path="/c/:courseId/rounds/:roundId" element={<RoundSummary />} />
             <Route path="/c/:courseId/h/:hole/details" element={<HoleView />} />
             <Route path="/c/:courseId/card" element={<Scorecard />} />
             <Route path="/c/:courseId/throw" element={<ThrowTool />} />

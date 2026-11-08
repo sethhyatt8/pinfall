@@ -41,7 +41,7 @@ export default defineConfig({
       },
       scope: base,
       injectManifest: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,json,woff,woff2,webmanifest}'],
         globIgnores: ['**/sw.js', '**/workbox-*.js', '**/*.map'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },

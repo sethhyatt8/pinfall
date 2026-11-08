@@ -77,6 +77,23 @@ export interface RawFix {
   timestamp: number
 }
 
+export interface DriveMark {
+  lat: number
+  lng: number
+  accuracyM: number
+  timestamp: number
+}
+
+/** Photo or video metadata. The bytes live in IndexedDB, not in this object. */
+export interface AttachmentMeta {
+  id: string
+  hole: number
+  name: string
+  mime: string
+  size: number
+  createdAt: number
+}
+
 export interface Round {
   id: string
   courseId: string
@@ -84,6 +101,11 @@ export interface Round {
   finishedAt?: number
   /** Hole number string -> strokes. */
   strokes: Record<string, number>
+  /** Hole the player should resume on. */
+  hole?: number
+  /** Hole number string -> where the drive landed. */
+  drives?: Record<string, DriveMark>
+  attachments?: AttachmentMeta[]
 }
 
 export interface Settings {

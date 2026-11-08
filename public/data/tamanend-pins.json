@@ -1,5 +1,403 @@
 {
   "courseId": "tamanend",
-  "readings": [],
-  "pins": []
+  "readings": [
+    {
+      "id": "e04a6c6a-1c49-4560-ac9c-0f2d49f3b7a6",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 1,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.18012575011192,
+      "lng": -75.03503890181935,
+      "accuracyM": 1.4352935815971495,
+      "timestamp": 1794164015480
+    },
+    {
+      "id": "8c533ad8-dcca-4943-bc3a-c1ac5528858e",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 1,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.179735883436905,
+      "lng": -75.03597400539557,
+      "accuracyM": 1.332689931577099,
+      "timestamp": 1794164235277
+    },
+    {
+      "id": "55ef5d8c-7cf9-4139-bf98-6e25d6b6dcdf",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 2,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.17949338164291,
+      "lng": -75.0362563253137,
+      "accuracyM": 1.3159119378779491,
+      "timestamp": 1794164958514
+    },
+    {
+      "id": "f6e41ea9-a774-44ec-91e2-e5d227d9c7c8",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 2,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.17938470485634,
+      "lng": -75.03552092501914,
+      "accuracyM": 1.2804396763349162,
+      "timestamp": 1794165160493
+    },
+    {
+      "id": "fef0dd69-7d7f-4634-987f-b5d6bd2fef85",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 3,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.17947703752475,
+      "lng": -75.03521341392936,
+      "accuracyM": 0.778252187613511,
+      "timestamp": 1794165208028
+    },
+    {
+      "id": "2894748a-c3b8-4d7b-8e84-49c26b5c7bc8",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 3,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.1791993299418,
+      "lng": -75.03503265354249,
+      "accuracyM": 1.2049737758907446,
+      "timestamp": 1794165368458
+    },
+    {
+      "id": "432aa7ed-87ed-4342-9ffa-23e6eeee7c4a",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 4,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.178863271015665,
+      "lng": -75.03494037040697,
+      "accuracyM": 1.3784322268291265,
+      "timestamp": 1794165477241
+    },
+    {
+      "id": "dee89d78-e988-48bc-b87f-af3b78172fcb",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 4,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.178814953173614,
+      "lng": -75.03439779972382,
+      "accuracyM": 1.2782574214804832,
+      "timestamp": 1794165579751
+    },
+    {
+      "id": "b4ee8102-daf3-4868-a02c-b46bc05b38e3",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 5,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.178546746708996,
+      "lng": -75.03402331857619,
+      "accuracyM": 1.3273902344484096,
+      "timestamp": 1794165668026
+    },
+    {
+      "id": "84b3ba51-f115-48d4-93ef-fece7cdefc2d",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 5,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.17801020290969,
+      "lng": -75.03418448363283,
+      "accuracyM": 1.199875282566061,
+      "timestamp": 1794165805576
+    },
+    {
+      "id": "0901a1b6-7b1c-440a-9ead-92489d4e888c",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 6,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.177869410923385,
+      "lng": -75.03366606974488,
+      "accuracyM": 1.5524529274209335,
+      "timestamp": 1794165881351
+    },
+    {
+      "id": "b2a787e0-85a9-4148-8c85-3312145aaec5",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 6,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.177602133648264,
+      "lng": -75.03317243712723,
+      "accuracyM": 2.1118788912889563,
+      "timestamp": 1794166002274
+    },
+    {
+      "id": "ad62b112-2efc-4f05-9bd9-4a1d09ecc5c0",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 7,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.177720132337086,
+      "lng": -75.03288023607385,
+      "accuracyM": 1.1431662929382187,
+      "timestamp": 1794166071345
+    },
+    {
+      "id": "4b7ee280-fe99-4d95-b6fe-5d29ccdeb830",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 7,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.178229275280955,
+      "lng": -75.0328913137455,
+      "accuracyM": 0.8441701850858445,
+      "timestamp": 1794166237586
+    },
+    {
+      "id": "d477ae3b-b64f-4aaf-a883-d91a229441d6",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 8,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.17803379274892,
+      "lng": -75.03348061891582,
+      "accuracyM": 1.1191647571072267,
+      "timestamp": 1794166325618
+    },
+    {
+      "id": "2bb3be64-e750-4dbd-91c5-0f24bea9fef5",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 8,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.178562900943376,
+      "lng": -75.03377499591201,
+      "accuracyM": 1.4018908675501367,
+      "timestamp": 1794166617894
+    },
+    {
+      "id": "802f00c6-e553-4626-aaf2-20a136095725",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 9,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.178739594131414,
+      "lng": -75.03371457545717,
+      "accuracyM": 1.4291987390002352,
+      "timestamp": 1794166661932
+    },
+    {
+      "id": "9e2e8eef-1f4e-4184-9ffa-ffb259819c53",
+      "role": "visit",
+      "courseId": "tamanend",
+      "hole": 9,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.17918371015372,
+      "lng": -75.0340038153777,
+      "accuracyM": 1.8214510993762647,
+      "timestamp": 1794166781000
+    }
+  ],
+  "pins": [
+    {
+      "hole": 1,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.179735883436905,
+      "lng": -75.03597400539557,
+      "accuracyM": 1.332689931577099,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 1,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.18012575011192,
+      "lng": -75.03503890181935,
+      "accuracyM": 1.4352935815971495,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 2,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.17938470485634,
+      "lng": -75.03552092501914,
+      "accuracyM": 1.2804396763349162,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 2,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.17949338164291,
+      "lng": -75.0362563253137,
+      "accuracyM": 1.3159119378779491,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 3,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.1791993299418,
+      "lng": -75.03503265354249,
+      "accuracyM": 1.2049737758907446,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 3,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.17947703752475,
+      "lng": -75.03521341392936,
+      "accuracyM": 1,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 4,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.178814953173614,
+      "lng": -75.03439779972382,
+      "accuracyM": 1.2782574214804832,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 4,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.178863271015665,
+      "lng": -75.03494037040697,
+      "accuracyM": 1.3784322268291265,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 5,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.17801020290969,
+      "lng": -75.03418448363283,
+      "accuracyM": 1.199875282566061,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 5,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.178546746708996,
+      "lng": -75.03402331857619,
+      "accuracyM": 1.3273902344484096,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 6,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.177602133648264,
+      "lng": -75.03317243712723,
+      "accuracyM": 2.1118788912889563,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 6,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.177869410923385,
+      "lng": -75.03366606974488,
+      "accuracyM": 1.5524529274209335,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 7,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.178229275280955,
+      "lng": -75.0328913137455,
+      "accuracyM": 1,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 7,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.177720132337086,
+      "lng": -75.03288023607385,
+      "accuracyM": 1.1431662929382187,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 8,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.178562900943376,
+      "lng": -75.03377499591201,
+      "accuracyM": 1.4018908675501367,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 8,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.17803379274892,
+      "lng": -75.03348061891582,
+      "accuracyM": 1.1191647571072267,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 9,
+      "target": "basket",
+      "variant": "A",
+      "lat": 40.17918371015372,
+      "lng": -75.0340038153777,
+      "accuracyM": 1.8214510993762647,
+      "usedCount": 1,
+      "rejectedCount": 0
+    },
+    {
+      "hole": 9,
+      "target": "tee",
+      "variant": "main",
+      "lat": 40.178739594131414,
+      "lng": -75.03371457545717,
+      "accuracyM": 1.4291987390002352,
+      "usedCount": 1,
+      "rejectedCount": 0
+    }
+  ]
 }

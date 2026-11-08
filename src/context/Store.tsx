@@ -1,16 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { COURSES } from '../data/courses.ts'
+import { loadBundledPoints, mergePinPoints } from '../lib/bundle.ts'
+import { deleteMedia } from '../lib/media.ts'
 import { ROUGH_GUESS_ACCURACY_M } from '../lib/sample.ts'
 import { selectionKey, statKey } from '../lib/holes.ts'
 import { createId, emptyPersisted } from '../lib/persist.ts'
 import { loadState, peekState, saveState } from '../lib/storage.ts'
-import type { BasketId, GpsFix, Persisted, PositionPoint, StatOverride, TargetKind, TeeId, UnitSystem } from '../types.ts'
+import type { AttachmentMeta, BasketId, DriveMark, GpsFix, Persisted, PositionPoint, StatOverride, TargetKind, TeeId, UnitSystem } from '../types.ts'
 import { StoreContext, type StoreApi } from './store-context.ts'
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   // Paint from the synchronous copy. IndexedDB must not gate the first screen.
   const [data, setData] = useState<Persisted>(() => peekState())
   const [hydrated, setHydrated] = useState(false)
+  const [bundled, setBundled] = useState<PositionPoint[]>([])
+  const [pinsReady, setPinsReady] = useState(false)
   const edited = useRef(false)
 
   useEffect(() => {
@@ -29,6 +34,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!hydrated) return
     void saveState(data)
   }, [data, hydrated])
+
+  useEffect(() => {
+    let cancel = false
+    const timer = window.setTimeout(() => {
+      if (!cancel) setPinsReady(true)
+    }, 2000)
+    void loadBundledPoints(COURSES.map((course) => course.id)).then((points) => {
+      if (cancel) return
+      window.clearTimeout(timer)
+      setBundled(points)
+      setPinsReady(true)
+    })
+    return () => {
+      cancel = true
+      window.clearTimeout(timer)
+    }
+  }, [])
+
+  const mergedPoints = useMemo(() => mergePinPoints(bundled, data.points), [bundled, data.points])
 
   const update = useCallback((recipe: (prev: Persisted) => Persisted) => {
     edited.current = true
@@ -230,6 +254,100 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [update],
   )
 
+  const setRoundHole = useCallback(
+    (courseId: string, hole: number) => {
+      update((prev) => {
+        const rounds = prev.rounds.slice()
+        const index = rounds.findIndex((round) => round.courseId === courseId && round.finishedAt == null)
+        if (index < 0) {
+          rounds.unshift({
+            id: createId(),
+            courseId,
+            startedAt: Date.now(),
+            strokes: {},
+            hole,
+            drives: {},
+            attachments: [],
+          })
+          return { ...prev, rounds }
+        }
+        if (rounds[index].hole === hole) return prev
+        rounds[index] = { ...rounds[index], hole }
+        return { ...prev, rounds }
+      })
+    },
+    [update],
+  )
+
+  const setDrive = useCallback(
+    (courseId: string, hole: number, drive: DriveMark | null) => {
+      update((prev) => {
+        const rounds = prev.rounds.slice()
+        const index = rounds.findIndex((round) => round.courseId === courseId && round.finishedAt == null)
+        if (index < 0) {
+          if (drive == null) return prev
+          rounds.unshift({
+            id: createId(),
+            courseId,
+            startedAt: Date.now(),
+            strokes: {},
+            hole,
+            drives: { [String(hole)]: drive },
+            attachments: [],
+          })
+          return { ...prev, rounds }
+        }
+        const round = rounds[index]
+        const drives = { ...(round.drives ?? {}) }
+        if (drive == null) delete drives[String(hole)]
+        else drives[String(hole)] = drive
+        rounds[index] = { ...round, drives }
+        return { ...prev, rounds }
+      })
+    },
+    [update],
+  )
+
+  const addAttachment = useCallback(
+    (courseId: string, attachment: AttachmentMeta) => {
+      update((prev) => {
+        const rounds = prev.rounds.slice()
+        const index = rounds.findIndex((round) => round.courseId === courseId && round.finishedAt == null)
+        if (index < 0) {
+          rounds.unshift({
+            id: createId(),
+            courseId,
+            startedAt: Date.now(),
+            strokes: {},
+            hole: attachment.hole,
+            drives: {},
+            attachments: [attachment],
+          })
+          return { ...prev, rounds }
+        }
+        const round = rounds[index]
+        rounds[index] = { ...round, attachments: [...(round.attachments ?? []), attachment] }
+        return { ...prev, rounds }
+      })
+    },
+    [update],
+  )
+
+  const removeAttachment = useCallback(
+    (courseId: string, attachmentId: string) => {
+      void deleteMedia(attachmentId)
+      update((prev) => ({
+        ...prev,
+        rounds: prev.rounds.map((round) =>
+          round.courseId === courseId && round.finishedAt == null
+            ? { ...round, attachments: (round.attachments ?? []).filter((item) => item.id !== attachmentId) }
+            : round,
+        ),
+      }))
+    },
+    [update],
+  )
+
   const finishRound = useCallback(
     (courseId: string) => {
       update((prev) => {
@@ -245,10 +363,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const discardActiveRound = useCallback(
     (courseId: string) => {
-      update((prev) => ({
-        ...prev,
-        rounds: prev.rounds.filter((round) => !(round.courseId === courseId && round.finishedAt == null)),
-      }))
+      update((prev) => {
+        const active = prev.rounds.find((round) => round.courseId === courseId && round.finishedAt == null)
+        for (const attachment of active?.attachments ?? []) void deleteMedia(attachment.id)
+        return {
+          ...prev,
+          rounds: prev.rounds.filter((round) => !(round.courseId === courseId && round.finishedAt == null)),
+        }
+      })
     },
     [update],
   )
@@ -265,6 +387,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const api: StoreApi = {
     data,
+    mergedPoints,
+    pinsReady,
     setUnits,
     dismissInstallHint,
     rememberHole,
@@ -275,6 +399,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setStatOverride,
     clearStatOverride,
     setStrokes,
+    setRoundHole,
+    setDrive,
+    addAttachment,
+    removeAttachment,
     finishRound,
     discardActiveRound,
     replaceAll,

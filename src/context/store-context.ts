@@ -1,6 +1,8 @@
 import { createContext, useContext } from 'react'
 import type {
+  AttachmentMeta,
   BasketId,
+  DriveMark,
   GpsFix,
   Persisted,
   PositionPoint,
@@ -12,6 +14,9 @@ import type {
 
 export interface StoreApi {
   data: Persisted
+  /** Published pins plus this phone's readings, with duplicate ids removed. */
+  mergedPoints: PositionPoint[]
+  pinsReady: boolean
   setUnits: (units: UnitSystem) => void
   dismissInstallHint: () => void
   rememberHole: (courseId: string, hole: number, tee: TeeId, basket: BasketId) => void
@@ -35,6 +40,10 @@ export interface StoreApi {
   ) => void
   clearStatOverride: (courseId: string, hole: number, tee: TeeId, basket: BasketId) => void
   setStrokes: (courseId: string, hole: number, strokes: number | null) => void
+  setRoundHole: (courseId: string, hole: number) => void
+  setDrive: (courseId: string, hole: number, drive: DriveMark | null) => void
+  addAttachment: (courseId: string, attachment: AttachmentMeta) => void
+  removeAttachment: (courseId: string, attachmentId: string) => void
   finishRound: (courseId: string) => void
   discardActiveRound: (courseId: string) => void
   replaceAll: (data: Persisted) => void

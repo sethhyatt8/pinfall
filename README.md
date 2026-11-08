@@ -8,7 +8,7 @@ Seeded courses:
 - **Tamanend Park** (Southampton, PA) — 9 holes, all par 3, about 1,785 ft total. Per-hole lengths are blank. The map opens near the approximate first tee (40.18016, -75.03501). That point is not saved as the tee.
 - **Tyler State Park** (Newtown, PA) — East 1–18 and West 19–36. Pars and lengths are blank so you can copy the signs. The map opens at the upper plantation parking lot. That point is not a tee or a basket.
 
-The phone does not download pin coordinates. Readings stay on the device until you send them. `public/data/<course>-pins.json` is the file the merge script updates; the app does not read it.
+Tamanend ships with the 18 saved tee and basket visits in `public/data/tamanend-pins.json`, so a new phone can show live distance to those baskets. Brandywine and Tyler stay empty until real readings are merged and published. A course center is never used as a pin. Readings you take on the phone stay on the phone until you send them.
 
 ## Run locally
 
@@ -50,9 +50,13 @@ The deployed URL must be **HTTPS**. Geolocation does not work on a phone over pl
 2. On the phone, open that URL once while you have a connection. That installs the app shell.
 3. **iPhone:** Safari → Share → **Add to Home Screen**. Open Pinfall from the icon, not from a normal tab. In Settings → Privacy & Security → Location Services, allow Safari (or the home-screen app) while using the app, and turn **Precise Location** on.
 4. **Android:** Chrome → menu → **Install app** or **Add to Home screen**. Allow location when asked.
-5. Pick a course. The hole screen shows **HOLE 1** (or whichever hole you were on), **TEE**, and **BASKET**. Tap the spot you are standing on. Hold still while it counts down. A green **SAVED ✓** confirms it, then disappears. **✓ Saved (1)** stays under that button. **◀ Hole** and **Hole ▶** move between holes.
-6. On the course list, tap **Send readings**. On iPhone this opens the share sheet with a JSON file. If the browser cannot share files, the same JSON downloads. The file includes every saved visit and every raw fix already on the phone (course, hole, tee or basket id, lat, lng, accuracy, timestamp).
-6. After that first load, the app, pins, distances, and scorecard open offline. GPS still works offline. Satellite photos are loaded live from Esri and are not stored for offline use — Esri’s World Imagery layer is not licensed for offline export. If you are offline, pins still plot on an empty map.
+5. Pick a course. The course screen has **Map a course** and **Play a round**.
+6. **Map a course** shows **HOLE 1** (or the hole you were on), **TEE**, and **BASKET**. Stand on the spot and tap it. Hold still while it counts down. A green **SAVED ✓** confirms it, then disappears. **✓ Saved (1)** stays under that button. **◀ Hole** and **Hole ▶** move between holes.
+7. **Play a round** shows a huge **HOLE N** and the live distance to the basket in feet. The number appears only when the phone has a GPS fix and that basket was saved. Otherwise it stays **—** with **No location** or **No saved basket**. Stand next to the disc and tap **Mark drive landing**. That stores one GPS reading, the feet from the tee, and the feet left to the basket. **Mark again** replaces it. Enter strokes with **+** and **−**, then **Finish hole**. The last hole opens **Round done**. Leave the app and come back: the course button says **Resume hole N** until the round is finished. Finished rounds stay in the list.
+8. **Add photo or video** is optional. The file is stored on the phone. **Remove** deletes it. If the phone is full, or the browser cannot store files, the message says so and the score stays.
+9. On **Round done**, tap **Save round file**. The share sheet (or a download) gives you one zip with the scores and the photos. In the share sheet, choose Google Drive and the folder **Pinfall Readings**. Pinfall does not upload the file.
+10. **Send readings** is on the course list and on the course screen. It shares a JSON file of every saved visit and every raw fix already on the phone. If the browser cannot share files, the same JSON downloads.
+11. After the first online load, mapping, play, saved pins, and scores open offline. GPS still works offline. Satellite photos are loaded live from Esri and are not stored for offline use. Esri’s World Imagery layer is not licensed for offline export.
 
 A phone cannot use your computer’s `localhost`. Location on the dev server only works in a browser on that same computer.
 
@@ -83,10 +87,10 @@ npm run merge-readings -- path/to/pinfall-readings.json
 
 That reads the export, dedupes by reading id against `public/data/<course>-pins.json`, and writes the combined raw readings plus a pin for each tee and basket. The pin is the inverse-variance average. A sample farther than 8 m and farther than 3× its own accuracy is left out. A visit that already has raw fixes is not averaged a second time. Run the same file again and the ids already in the bundle are skipped.
 
-3. Commit the updated `public/data/*-pins.json` and push to `main` so the next deploy has the coordinates on file.
+3. Commit the updated `public/data/*-pins.json` and push to `main`. The next deploy publishes those coordinates. Tamanend already loads its published visits for live distance. A reading id that is both published and saved on the phone is counted once, and the phone’s copy is kept. New visits on the phone are included in the average. Brandywine and Tyler show a distance only after real pins are published the same way.
 
-The live app still only shows what was saved on that phone. It does not load the bundled JSON.
+Photos and videos are stored in a separate IndexedDB database (`pinfall-media`). The round record keeps the file name and size, not the bytes, so a large photo is not copied into `localStorage`.
 
 ## Data
 
-Pins, scorecards, par/length edits, and settings are stored in IndexedDB (`pinfall`) and mirrored to `localStorage` (`pinfall.v1`). **Data → Export JSON** downloads a version-1 backup. Import replaces what is on the phone. Erase clears saved data and leaves the three courses in place.
+Pins, rounds, par/length edits, and settings are stored in IndexedDB (`pinfall`) and mirrored to `localStorage` (`pinfall.v1`). Photo and video bytes stay in IndexedDB (`pinfall-media`). **Data → Export JSON** downloads a version-1 backup of the small records. Import replaces what is on the phone. Erase clears saved data and leaves the three courses in place. The published Tamanend pins come back with the app.
